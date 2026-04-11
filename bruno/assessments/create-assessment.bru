@@ -1,0 +1,36 @@
+meta {
+  name: Create Assessment
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/admin/assessments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "companyId": "{{companyId}}",
+    "projectName": "DX Assessment 2026",
+    "roiSettings": {
+      "engineersCount": 5,
+      "workingDaysPerWeek": 5,
+      "savingRate": 0.35,
+      "hourlyCost": 75,
+      "overheadMultiplier": 1.3,
+      "currency": "SAR"
+    }
+  }
+}
+
+script:after-response {
+  if (res.status === 201) {
+    bru.setVar("assessmentId", res.body.data.id);
+  }
+}

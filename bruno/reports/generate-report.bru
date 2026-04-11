@@ -1,0 +1,15 @@
+meta {
+  name: Generate Report
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/admin/reports/{{assessmentId}}/generate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

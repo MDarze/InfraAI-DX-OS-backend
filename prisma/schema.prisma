@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+  WHATSAPP
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  VIEWER
+}
+
+enum MeetingType {
+  DISCOVERY
+  ASSESSMENT
+  FOLLOWUP
+  PRESENTATION
+}
+
+model Company {
+  id                  String          @id @default(uuid())
+  name                String
+  emirateRegistration String          @unique
+  industry            String
+  companySize         String
+  city                String
+  notes               String?
+  deletedAt           DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  contactPerson       ContactPerson?
+  assessments         Assessment[]
+  meetings            MeetingRecord[]
+}
+
+model ContactPerson {
+  id                    String        @id @default(uuid())
+  companyId             String        @unique
+  name                  String
+  jobTitle              String
+  email                 String        @unique
+  phone                 String
+  whatsapp              String?
+  preferredContactMethod ContactMethod @default(EMAIL)
+  linkedinUrl           String?
+
+  company               Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Representative {
+  id          String          @id @default(uuid())
+  fullName    String
+  email       String          @unique
+  phone       String
+  role        String
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+
+  assessments Assessment[]
+  meetings    MeetingRecord[]
+}
+
+model Assessment {
+  id               String            @id @default(uuid())
+  companyId        String
+  representativeId String?
+  projectName      String?
+  status           String            @default("draft")
+  roiSettings      Json
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  completedAt      DateTime?
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  representative   Representative?   @relation(fields: [representativeId], references: [id])
+  respondents      Respondent[]
+  report           AssessmentReport?
+}
+
+model Respondent {
+  id           String     @id @default(uuid())
+  assessmentId String
+  role         String
+  name         String
+  completedAt  DateTime?
+  createdAt    DateTime   @default(now())
+
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  answers      Answer[]
+}
+
+model Answer {
+  id           String     @id @default(uuid())
+  respondentId String
+  questionId   String
+  value        Json?
+  evidenceNote String?
+  evidenceRef  String?
+  createdAt    DateTime   @default(now())
+
+  respondent   Respondent @relation(fields: [respondentId], references: [id], onDelete: Cascade)
+
+  @@unique([respondentId, questionId])
+}
+
+model AssessmentReport {
+  id             String     @id @default(uuid())
+  assessmentId   String     @unique
+  axisScores     Json
+  aggregateScore Decimal    @db.Decimal(4, 2)
+  painSignals    Json
+  roi            Json
+  risks          Json
+  backlog        Json
+  quickWins      Json
+  quickWinsAR    Json
+  aiOpportunities Json
+  aiOpportunitiesAR Json
+  dna            Json
+  generatedAt    DateTime   @default(now())
+  generatedBy    String
+
+  assessment     Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  role         AdminRole @default(ADMIN)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MeetingRecord {
+  id               String      @id @default(uuid())
+  companyId        String
+  representativeId String
+  meetingDate      DateTime
+  meetingType      MeetingType
+  attendees        Json
+  notes            String
+  nextSteps        String
+  recordedAt       DateTime    @default(now())
+
+  company          Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  representative   Representative @relation(fields: [representativeId], references: [id])
+}

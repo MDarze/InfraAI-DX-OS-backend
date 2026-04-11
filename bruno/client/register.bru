@@ -1,0 +1,30 @@
+meta {
+  name: Client Register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/client/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Al-Watan Builders",
+    "companySize": "50-200",
+    "city": "Riyadh",
+    "contactName": "Ahmad Al-Watan",
+    "contactEmail": "ahmad@alwatan.sa",
+    "contactPhone": "+966501234000",
+    "emirateRegistration": "SA-CON-777",
+    "industry": "Construction"
+  }
+}
+
+script:after-response {
+  if (res.status === 201) {
+    bru.setVar("assessmentId", res.body.data.assessmentId);
+  }
+}
