@@ -48,7 +48,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         assessments: {
           create: {
             status: 'draft',
-            roiSettings: DEFAULT_ROI,
+            roiSettings: JSON.parse(JSON.stringify(DEFAULT_ROI)),
           },
         },
       },
@@ -57,7 +57,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
       },
     });
 
-    const assessmentId = company.assessments[0].id;
+    const assessmentId = (company.assessments as Array<{ id: string }>)[0].id;
 
     created(res, { companyId: company.id, assessmentId });
   } catch (err) {
@@ -139,7 +139,7 @@ export async function submitAssessment(req: Request, res: Response, next: NextFu
     // Update ROI settings
     await prisma.assessment.update({
       where: { id: assessment.id },
-      data: { roiSettings, status: 'completed', completedAt: new Date() },
+      data: { roiSettings: JSON.parse(JSON.stringify(roiSettings)), status: 'completed', completedAt: new Date() },
     });
 
     // Generate report immediately
@@ -165,31 +165,31 @@ export async function submitAssessment(req: Request, res: Response, next: NextFu
       where: { assessmentId: assessment.id },
       create: {
         assessmentId: assessment.id,
-        axisScores: result.axisScores,
+        axisScores: JSON.parse(JSON.stringify(result.axisScores)),
         aggregateScore: result.aggregateScore,
-        painSignals: result.painSignals,
-        roi: result.roi,
-        risks: result.risks,
-        backlog: result.backlog,
+        painSignals: JSON.parse(JSON.stringify(result.painSignals)),
+        roi: JSON.parse(JSON.stringify(result.roi)),
+        risks: JSON.parse(JSON.stringify(result.risks)),
+        backlog: JSON.parse(JSON.stringify(result.backlog)),
         quickWins: result.quickWins,
         quickWinsAR: result.quickWinsAR,
         aiOpportunities: result.aiOpportunities,
         aiOpportunitiesAR: result.aiOpportunitiesAR,
-        dna: result.dna,
+        dna: JSON.parse(JSON.stringify(result.dna)),
         generatedBy: 'client-submit',
       },
       update: {
-        axisScores: result.axisScores,
+        axisScores: JSON.parse(JSON.stringify(result.axisScores)),
         aggregateScore: result.aggregateScore,
-        painSignals: result.painSignals,
-        roi: result.roi,
-        risks: result.risks,
-        backlog: result.backlog,
+        painSignals: JSON.parse(JSON.stringify(result.painSignals)),
+        roi: JSON.parse(JSON.stringify(result.roi)),
+        risks: JSON.parse(JSON.stringify(result.risks)),
+        backlog: JSON.parse(JSON.stringify(result.backlog)),
         quickWins: result.quickWins,
         quickWinsAR: result.quickWinsAR,
         aiOpportunities: result.aiOpportunities,
         aiOpportunitiesAR: result.aiOpportunitiesAR,
-        dna: result.dna,
+        dna: JSON.parse(JSON.stringify(result.dna)),
         generatedBy: 'client-submit',
       },
     });

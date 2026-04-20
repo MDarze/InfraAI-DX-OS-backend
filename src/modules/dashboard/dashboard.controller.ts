@@ -21,8 +21,8 @@ export async function getStats(req: Request, res: Response, next: NextFunction) 
       prisma.assessment.count({ where: { status: 'draft' } }),
       prisma.assessment.count({ where: { status: 'completed' } }),
       prisma.assessmentReport.findMany({ select: { aggregateScore: true } }),
-      prisma.company.groupBy({ by: ['companySize'], _count: true, where: { deletedAt: null } }),
-      prisma.company.groupBy({ by: ['city'], _count: true, where: { deletedAt: null } }),
+      prisma.company.groupBy({ by: ['companySize'], _count: true, where: { deletedAt: null }, orderBy: {} }),
+      prisma.company.groupBy({ by: ['city'], _count: true, where: { deletedAt: null }, orderBy: {} }),
       prisma.assessment.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
